@@ -3,113 +3,198 @@
 <head>
   <meta charset="UTF-8">
   <title>Волшебный 3D Зоопарк Рисунков</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Comic Sans MS', 'Chalkboard SE', 'Segoe UI', cursive, sans-serif; user-select: none; }
-    body { overflow: hidden; background: #000; width: 100vw; height: 100vh; }
+    * { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0; 
+      font-family: 'Comic Sans MS', 'Chalkboard SE', 'Segoe UI', cursive, sans-serif; 
+      user-select: none; 
+      -webkit-user-select: none;
+    }
+    body, html { 
+      overflow: hidden; 
+      background: #000; 
+      width: 100%; 
+      height: 100%; 
+      position: fixed;
+    }
     
     /* 3D Окно */
-    #canvas-container { width: 100%; height: 100%; position: absolute; left: 0; top: 0; z-index: 1; }
+    #canvas-container { 
+      width: 100%; 
+      height: 100%; 
+      position: absolute; 
+      left: 0; 
+      top: 0; 
+      z-index: 1; 
+    }
 
-    /* Кнопки управления в 3D мире */
+    /* Верхняя панель */
     .hud {
-      position: absolute; z-index: 10;
+      position: absolute; 
+      top: 0;
+      left: 0;
+      z-index: 10;
       pointer-events: none;
-      display: flex; justify-content: space-between;
-      width: 100%; padding: 20px;
+      display: flex; 
+      justify-content: space-between;
+      width: 100%; 
+      padding: 16px;
     }
     .hud button {
       pointer-events: auto;
-      background: #ff4757; color: white; border: none;
-      padding: 14px 26px; font-size: 1.2rem; font-weight: bold;
-      border-radius: 50px; cursor: pointer;
-      box-shadow: 0 8px 15px rgba(0,0,0,0.3);
-      transition: all 0.2s ease;
+      background: #ff4757; 
+      color: white; 
+      border: none;
+      padding: 12px 22px; 
+      font-size: 1rem; 
+      font-weight: bold;
+      border-radius: 50px; 
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      touch-action: manipulation;
     }
-    .hud button:hover { transform: scale(1.05); background: #ff6b81; }
+    .hud button:active { transform: scale(0.95); }
 
-    /* Инфо-панель выбранного зверя */
+    /* Табличка имени */
     #info-card {
-      position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%);
-      background: rgba(255, 255, 255, 0.9); padding: 12px 28px;
-      border-radius: 20px; font-size: 1.1rem; font-weight: bold;
-      color: #2f3542; box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-      display: none; z-index: 10; text-align: center;
+      position: absolute; 
+      bottom: 25px; 
+      left: 50%; 
+      transform: translateX(-50%);
+      background: rgba(255, 255, 255, 0.95); 
+      padding: 12px 26px;
+      border-radius: 20px; 
+      font-size: 1.1rem; 
+      font-weight: bold;
+      color: #2f3542; 
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      display: none; 
+      z-index: 10; 
+      text-align: center;
+      pointer-events: none;
     }
 
-    /* Модальное окно мастерской рисования */
+    /* Модальное окно мастерской */
     #creator-modal {
-      position: absolute; z-index: 20;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(47, 53, 66, 0.85);
-      backdrop-filter: blur(8px);
-      display: flex; justify-content: center; align-items: center;
+      position: absolute; 
+      z-index: 100;
+      top: 0; 
+      left: 0; 
+      width: 100%; 
+      height: 100%;
+      background: rgba(47, 53, 66, 0.75);
+      backdrop-filter: blur(6px);
+      display: flex; 
+      justify-content: center; 
+      align-items: center;
     }
     .workshop {
-      background: #ffffff; border-radius: 30px;
-      padding: 25px; width: 90%; max-width: 580px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-      display: flex; flex-direction: column; align-items: center; gap: 15px;
+      background: #ffffff; 
+      border-radius: 24px;
+      padding: 20px; 
+      width: 92%; 
+      max-width: 440px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      gap: 12px;
+      pointer-events: auto;
     }
-    h2 { color: #2f3542; }
+    h2 { font-size: 1.3rem; color: #2f3542; }
 
     #paintCanvas {
-      background: #f1f2f6; border-radius: 20px;
-      border: 3px dashed #ced6e0; cursor: crosshair;
-      touch-action: none;
+      background: #f8f9fa; 
+      border-radius: 16px;
+      border: 3px dashed #ced6e0; 
+      cursor: crosshair;
+      touch-action: none; /* Запрещает браузеру перехватывать жесты рисования */
+      display: block;
     }
 
-    .palette { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+    .palette { 
+      display: flex; 
+      gap: 8px; 
+      flex-wrap: wrap; 
+      justify-content: center; 
+      width: 100%;
+    }
     .color-btn {
-      width: 32px; height: 32px; border-radius: 50%;
-      border: 3px solid white; cursor: pointer;
+      width: 32px; 
+      height: 32px; 
+      border-radius: 50%;
+      border: 3px solid #ffffff; 
+      cursor: pointer;
       box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      touch-action: manipulation;
     }
-    .color-btn.active { transform: scale(1.2); border-color: #2f3542; }
+    .color-btn.active { 
+      transform: scale(1.15); 
+      border-color: #2f3542; 
+    }
 
-    .tools { display: flex; gap: 10px; width: 100%; align-items: center; justify-content: space-between; }
+    .tools { 
+      display: flex; 
+      gap: 8px; 
+      width: 100%; 
+      justify-content: space-between; 
+    }
     .input-field {
-      padding: 10px 15px; border-radius: 12px; border: 2px solid #ced6e0;
-      font-size: 1rem; width: 50%; outline: none;
+      padding: 10px 12px; 
+      border-radius: 12px; 
+      border: 2px solid #ced6e0;
+      font-size: 0.95rem; 
+      outline: none;
+      background: #fff;
     }
-    select.input-field { width: 45%; cursor: pointer; }
+    input.input-field { width: 50%; }
+    select.input-field { width: 48%; }
 
-    .action-btns { display: flex; gap: 12px; width: 100%; }
+    .action-btns { display: flex; gap: 10px; width: 100%; }
     .btn {
-      flex: 1; padding: 12px; border: none; border-radius: 15px;
-      font-size: 1.1rem; font-weight: bold; cursor: pointer;
-      transition: 0.2s;
+      flex: 1; 
+      padding: 12px; 
+      border: none; 
+      border-radius: 14px;
+      font-size: 1rem; 
+      font-weight: bold; 
+      cursor: pointer;
+      touch-action: manipulation;
     }
+    .btn:active { transform: scale(0.97); }
     .btn-clear { background: #dfe4ea; color: #57606f; }
     .btn-create { background: #2ed573; color: white; }
-    .btn-create:hover { background: #26af5f; }
   </style>
-  <!-- Three.js & OrbitControls -->
+
+  <!-- Three.js + OrbitControls -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 </head>
 <body>
 
   <div class="hud">
-    <button id="open-paint-btn">✨ Оживить новое существо</button>
-    <button id="clear-all-btn" style="background: #747d8c; font-size: 0.9rem;">Очистить зоопарк</button>
+    <button id="open-paint-btn">✨ Нарисовать зверя</button>
+    <button id="clear-all-btn" style="background: #747d8c; font-size: 0.85rem;">Сброс зоопарка</button>
   </div>
 
   <div id="info-card">Привет! Меня зовут <span id="card-name" style="color: #ff4757;">Зверь</span>! 🐾</div>
 
   <div id="canvas-container"></div>
 
-  <!-- Окно Рисования -->
+  <!-- Окно рисования -->
   <div id="creator-modal">
-    <div class="workshop">
+    <div class="workshop" id="workshop-card">
       <h2>🎨 Нарисуй своего питомца</h2>
       
-      <canvas id="paintCanvas" width="340" height="340"></canvas>
+      <canvas id="paintCanvas" width="300" height="300"></canvas>
 
       <div class="palette" id="palette"></div>
 
       <div class="tools">
-        <input type="text" id="animal-name" class="input-field" placeholder="Придумай имя..." maxlength="14" value="Чудик">
+        <input type="text" id="animal-name" class="input-field" placeholder="Имя..." maxlength="12" value="Пушистик">
         <select id="biome-select" class="input-field">
           <option value="grass">🌱 Зелёные Луга</option>
           <option value="desert">🏜️ Песчаная Пустыня</option>
@@ -119,256 +204,237 @@
       </div>
 
       <div class="action-btns">
-        <button class="btn btn-clear" id="canvas-clear">Стереть всё</button>
-        <button class="btn btn-create" id="spawn-btn">Оживить в 3D! 🪄</button>
+        <button class="btn btn-clear" id="canvas-clear" type="button">Стереть</button>
+        <button class="btn btn-create" id="spawn-btn" type="button">Оживить! 🪄</button>
       </div>
     </div>
   </div>
 
   <script>
     /* ====================================================================
-       1. СИСТЕМА РИСОВАНИЯ (2D CANVAS)
+       1. СИСТЕМА РИСОВАНИЯ (ПОДДЕРЖКА МЫШИ, ТАЧА И СТИЛУСА ЧЕРЕЗ POINTER)
        ==================================================================== */
     const pCanvas = document.getElementById('paintCanvas');
     const ctx = pCanvas.getContext('2d', { willReadFrequently: true });
+    
     let painting = false;
     let currentColor = '#2ed573';
-    let brushSize = 16;
+    let brushSize = 14;
 
-    const colors = ['#2f3542', '#ff4757', '#ffa502', '#2ed573', '#1e90ff', '#9b59b6', '#eccc68', '#ffffff'];
+    const colors = ['#2f3542', '#ff4757', '#ffa502', '#2ed573', '#1e90ff', '#9b59b6', '#8B5A2B', '#ffffff'];
     const palette = document.getElementById('palette');
 
-    colors.forEach((c, idx) => {
+    colors.forEach((col, idx) => {
       const b = document.createElement('div');
       b.className = 'color-btn' + (idx === 3 ? ' active' : '');
-      b.style.backgroundColor = c;
-      b.onclick = () => {
+      b.style.backgroundColor = col;
+      
+      b.addEventListener('pointerdown', (e) => {
+        e.stopPropagation();
         document.querySelectorAll('.color-btn').forEach(btn => btn.classList.remove('active'));
         b.classList.add('active');
-        currentColor = c;
-      };
+        currentColor = col;
+      });
       palette.appendChild(b);
     });
 
+    function getCoords(e) {
+      const rect = pCanvas.getBoundingClientRect();
+      const scaleX = pCanvas.width / rect.width;
+      const scaleY = pCanvas.height / rect.height;
+      return {
+        x: (e.clientX - rect.left) * scaleX,
+        y: (e.clientY - rect.top) * scaleY
+      };
+    }
+
     function startDraw(e) {
       painting = true;
+      pCanvas.setPointerCapture(e.pointerId);
+      const pos = getCoords(e);
+      ctx.beginPath();
+      ctx.moveTo(pos.x, pos.y);
       draw(e);
     }
-    function stopDraw() {
+
+    function stopDraw(e) {
+      if (!painting) return;
       painting = false;
-      ctx.beginPath();
+      ctx.closePath();
+      try { pCanvas.releasePointerCapture(e.pointerId); } catch(err){}
     }
+
     function draw(e) {
       if (!painting) return;
-      const rect = pCanvas.getBoundingClientRect();
-      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-      const x = clientX - rect.left;
-      const y = clientY - rect.top;
+      const pos = getCoords(e);
 
       ctx.lineWidth = brushSize;
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
       ctx.strokeStyle = currentColor;
 
-      ctx.lineTo(x, y);
+      ctx.lineTo(pos.x, pos.y);
       ctx.stroke();
       ctx.beginPath();
-      ctx.moveTo(x, y);
+      ctx.moveTo(pos.x, pos.y);
     }
 
-    pCanvas.addEventListener('mousedown', startDraw);
-    window.addEventListener('mouseup', stopDraw);
-    pCanvas.addEventListener('mousemove', draw);
+    pCanvas.addEventListener('pointerdown', startDraw);
+    pCanvas.addEventListener('pointermove', draw);
+    pCanvas.addEventListener('pointerup', stopDraw);
+    pCanvas.addEventListener('pointercancel', stopDraw);
 
-    pCanvas.addEventListener('touchstart', startDraw);
-    window.addEventListener('touchend', stopDraw);
-    pCanvas.addEventListener('touchmove', draw);
-
-    document.getElementById('canvas-clear').onclick = () => {
+    document.getElementById('canvas-clear').addEventListener('click', (e) => {
+      e.stopPropagation();
       ctx.clearRect(0, 0, pCanvas.width, pCanvas.height);
-    };
+    });
+
+    // Предотвращение прокликивания сквозь форму рисования в 3D сцену
+    document.getElementById('workshop-card').addEventListener('pointerdown', (e) => e.stopPropagation());
 
     /* ====================================================================
-       2. 3D МИР (THREE.JS) И БИОМЫ
+       2. 3D МИР (THREE.JS)
        ==================================================================== */
     const container = document.getElementById('canvas-container');
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0xa0e2ff);
-    scene.fog = new THREE.Fog(0xa0e2ff, 40, 120);
+    scene.fog = new THREE.Fog(0xa0e2ff, 40, 110);
 
     const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 500);
-    camera.position.set(0, 25, 45);
+    camera.position.set(0, 24, 40);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     container.appendChild(renderer.domElement);
 
     const controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
-    controls.maxPolarAngle = Math.PI / 2.05; // Не уходить под землю
-    controls.maxDistance = 90;
+    controls.maxPolarAngle = Math.PI / 2.05;
+    controls.maxDistance = 75;
     controls.minDistance = 8;
 
-    // Освещение
-    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.7);
+    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x555555, 0.75);
     scene.add(hemiLight);
 
-    const dirLight = new THREE.DirectionalLight(0xfffaed, 0.9);
-    dirLight.position.set(30, 50, 20);
+    const dirLight = new THREE.DirectionalLight(0xfffaed, 0.85);
+    dirLight.position.set(25, 40, 20);
     dirLight.castShadow = true;
-    dirLight.shadow.mapSize.width = 2048;
-    dirLight.shadow.mapSize.height = 2048;
-    dirLight.shadow.camera.left = -50;
-    dirLight.shadow.camera.right = 50;
-    dirLight.shadow.camera.top = 50;
-    dirLight.shadow.camera.bottom = -50;
     scene.add(dirLight);
 
-    // Зоны 4-х биомов
     const BIOMES = {
-      grass:  { center: new THREE.Vector3(-22, 0, -22), color: 0x7bed9f, name: "Зелёные Луга" },
-      snow:   { center: new THREE.Vector3(22, 0, -22),  color: 0xf1f2f6, name: "Снежная Тундра" },
-      desert: { center: new THREE.Vector3(22, 0, 22),   color: 0xf6b93b, name: "Песчаная Пустыня" },
-      forest: { center: new THREE.Vector3(-22, 0, 22),  color: 0x38ada9, name: "Густой Лес" }
+      grass:  { center: new THREE.Vector3(-18, 0, -18), color: 0x7bed9f, name: "Зелёные Луга" },
+      snow:   { center: new THREE.Vector3(18, 0, -18),  color: 0xf1f2f6, name: "Снежная Тундра" },
+      desert: { center: new THREE.Vector3(18, 0, 18),   color: 0xf6b93b, name: "Песчаная Пустыня" },
+      forest: { center: new THREE.Vector3(-18, 0, 18),  color: 0x38ada9, name: "Густой Лес" }
     };
 
-    // Генерация острова со слитными секторами биомов
-    function createIsland() {
-      // 4 платформы под каждый сектор
+    function initWorld() {
       Object.keys(BIOMES).forEach(k => {
         const b = BIOMES[k];
-        const geo = new THREE.CylinderGeometry(24, 26, 4, 32);
+        const geo = new THREE.CylinderGeometry(20, 22, 3.5, 32);
         const mat = new THREE.MeshLambertMaterial({ color: b.color });
         const mesh = new THREE.Mesh(geo, mat);
-        mesh.position.set(b.center.x, -2, b.center.z);
+        mesh.position.set(b.center.x, -1.75, b.center.z);
         mesh.receiveShadow = true;
         scene.add(mesh);
 
-        // Декорации для каждого биома
-        decorateBiome(k, b.center);
+        // Декорации
+        for (let i = 0; i < 5; i++) {
+          const ang = Math.random() * Math.PI * 2;
+          const rad = 4 + Math.random() * 10;
+          const x = b.center.x + Math.cos(ang) * rad;
+          const z = b.center.z + Math.sin(ang) * rad;
+
+          if (k === 'forest') {
+            const tr = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.35, 1.6), new THREE.MeshLambertMaterial({color: 0x795548}));
+            const fol = new THREE.Mesh(new THREE.ConeGeometry(1.4, 2.6, 5), new THREE.MeshLambertMaterial({color: 0x1e824c}));
+            fol.position.y = 1.8;
+            tr.position.set(x, 0.8, z);
+            tr.add(fol);
+            scene.add(tr);
+          } else if (k === 'snow') {
+            const rock = new THREE.Mesh(new THREE.DodecahedronGeometry(0.7), new THREE.MeshLambertMaterial({color: 0xdff9fb}));
+            rock.position.set(x, 0.5, z);
+            scene.add(rock);
+          } else if (k === 'desert') {
+            const cact = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 2), new THREE.MeshLambertMaterial({color: 0x2ed573}));
+            cact.position.set(x, 1, z);
+            scene.add(cact);
+          } else {
+            const bush = new THREE.Mesh(new THREE.SphereGeometry(0.7, 5, 5), new THREE.MeshLambertMaterial({color: 0x2ecc71}));
+            bush.scale.set(1, 0.5, 1);
+            bush.position.set(x, 0.35, z);
+            scene.add(bush);
+          }
+        }
       });
     }
-
-    function decorateBiome(type, center) {
-      for(let i=0; i<7; i++) {
-        const angle = Math.random() * Math.PI * 2;
-        const rad = 5 + Math.random() * 14;
-        const x = center.x + Math.cos(angle) * rad;
-        const z = center.z + Math.sin(angle) * rad;
-
-        if (type === 'forest') {
-          // Деревья
-          const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.4, 1.8), new THREE.MeshLambertMaterial({color: 0x795548}));
-          const foliage = new THREE.Mesh(new THREE.ConeGeometry(1.6, 3, 5), new THREE.MeshLambertMaterial({color: 0x1e824c}));
-          foliage.position.y = 2;
-          trunk.position.set(x, 0.9, z);
-          foliage.castShadow = true;
-          trunk.add(foliage);
-          scene.add(trunk);
-        } else if (type === 'snow') {
-          // Ледяные кристаллы / сугробы
-          const rock = new THREE.Mesh(new THREE.DodecahedronGeometry(0.7 + Math.random()*0.8), new THREE.MeshLambertMaterial({color: 0xdff9fb}));
-          rock.position.set(x, 0.6, z);
-          rock.castShadow = true;
-          scene.add(rock);
-        } else if (type === 'desert') {
-          // Кактусы
-          const cactus = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 2.4), new THREE.MeshLambertMaterial({color: 0x2ed573}));
-          cactus.position.set(x, 1.2, z);
-          cactus.castShadow = true;
-          scene.add(cactus);
-        } else if (type === 'grass') {
-          // Цветы / кустики
-          const bush = new THREE.Mesh(new THREE.SphereGeometry(0.8, 6, 6), new THREE.MeshLambertMaterial({color: 0x2ecc71}));
-          bush.scale.set(1, 0.6, 1);
-          bush.position.set(x, 0.4, z);
-          scene.add(bush);
-        }
-      }
-    }
-
-    createIsland();
+    initWorld();
 
     /* ====================================================================
-       3. ПРЕВРАЩЕНИЕ 2D РИСУНКА В 3D МОДЕЛЬ С ТЕКСТУРОЙ
+       3. ПРЕВРАЩЕНИЕ РИСУНКА В ЖИВОЕ 3D СУЩЕСТВО
        ==================================================================== */
     const animals = [];
 
-    function generate3DFromCanvas(dataUrl, biomeKey, name) {
+    function spawn3DAnimal(dataUrl, biomeKey, name) {
       const img = new Image();
       img.src = dataUrl;
       img.onload = () => {
-        // Создаем текстуру
         const texture = new THREE.Texture(img);
         texture.needsUpdate = true;
 
-        // Создаем форму: берем кубическую объемную заготовку со скругленными гранями (стиль мягкой игрушки)
-        // И проецируем рисунок на переднюю и заднюю грани
-        const geometry = new THREE.BoxGeometry(3.5, 3.5, 0.6, 4, 4, 2);
-        
-        // Материал с рисунком ребенка
+        const geometry = new THREE.BoxGeometry(3.2, 3.2, 0.5, 2, 2, 1);
         const faceMat = new THREE.MeshStandardMaterial({
           map: texture,
           transparent: true,
-          roughness: 0.4,
-          metalness: 0.1,
-          alphaTest: 0.05
+          alphaTest: 0.1,
+          roughness: 0.3
         });
+        const sideMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.8 });
 
-        const sideMat = new THREE.MeshStandardMaterial({
-          color: 0xffffff,
-          roughness: 0.6
-        });
-
-        // BoxGeometry имеет 6 сторон: [right, left, top, bottom, front, back]
-        const materials = [sideMat, sideMat, sideMat, sideMat, faceMat, faceMat];
-        const mesh = new THREE.Mesh(geometry, materials);
+        const mesh = new THREE.Mesh(geometry, [sideMat, sideMat, sideMat, sideMat, faceMat, faceMat]);
         mesh.castShadow = true;
+        mesh.position.y = 1.6;
 
-        // Контейнер животного для анимации покачивания и поворота
         const animalRoot = new THREE.Group();
         animalRoot.add(mesh);
-        mesh.position.y = 1.8; // Приподнять над землей
 
-        // Добавим милую тень-подложку
-        const shadowPlane = new THREE.Mesh(
-          new THREE.CircleGeometry(1.2, 16),
+        // Тень
+        const shadow = new THREE.Mesh(
+          new THREE.CircleGeometry(1.1, 16),
           new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.25 })
         );
-        shadowPlane.rotation.x = -Math.PI / 2;
-        shadowPlane.position.y = 0.03;
-        animalRoot.add(shadowPlane);
+        shadow.rotation.x = -Math.PI / 2;
+        shadow.position.y = 0.03;
+        animalRoot.add(shadow);
 
-        // Начальная позиция в своем биоме
         const targetBiome = BIOMES[biomeKey] || BIOMES.grass;
-        const spawnX = targetBiome.center.x + (Math.random() - 0.5) * 12;
-        const spawnZ = targetBiome.center.z + (Math.random() - 0.5) * 12;
-        animalRoot.position.set(spawnX, 0, spawnZ);
+        const sx = targetBiome.center.x + (Math.random() - 0.5) * 8;
+        const sz = targetBiome.center.z + (Math.random() - 0.5) * 8;
+        animalRoot.position.set(sx, 0, sz);
 
         scene.add(animalRoot);
 
-        // Данные поведения существа
-        const animalData = {
+        const data = {
           root: animalRoot,
           bodyMesh: mesh,
           name: name || "Дружок",
           biome: biomeKey,
-          targetPos: new THREE.Vector3(spawnX, 0, spawnZ),
+          targetPos: new THREE.Vector3(sx, 0, sz),
           speed: 0.02 + Math.random() * 0.02,
           timer: 0,
           bounceOffset: Math.random() * 10
         };
 
-        animals.push(animalData);
-        mesh.userData = animalData; // для клика
+        animals.push(data);
+        mesh.userData = data;
       };
     }
 
     /* ====================================================================
-       4. ЖИЗНЬ ЗВЕРЕЙ (Анимация движения и поведение)
+       4. АНИМАЦИЯ И ПОВЕДЕНИЕ
        ==================================================================== */
     const clock = new THREE.Clock();
 
@@ -378,162 +444,142 @@
 
       animals.forEach(a => {
         a.timer -= delta;
-        // Каждые несколько секунд выбираем новую точку для прогулки в пределах биома
         if (a.timer <= 0) {
           const center = BIOMES[a.biome].center;
           a.targetPos.set(
-            center.x + (Math.random() - 0.5) * 18,
+            center.x + (Math.random() - 0.5) * 14,
             0,
-            center.z + (Math.random() - 0.5) * 18
+            center.z + (Math.random() - 0.5) * 14
           );
-          a.timer = 3 + Math.random() * 5;
+          a.timer = 3 + Math.random() * 4;
         }
 
-        // Плавный поворот и движение к цели
         const dir = new THREE.Vector3().subVectors(a.targetPos, a.root.position);
         dir.y = 0;
         if (dir.length() > 0.4) {
           dir.normalize();
           a.root.position.addScaledVector(dir, a.speed);
-          
-          // Поворот передом по ходу движения
-          const targetAngle = Math.atan2(dir.x, dir.z);
-          a.root.rotation.y = THREE.MathUtils.lerp(a.root.rotation.y, targetAngle, 0.05);
 
-          // Анимация шага / покачивания при ходьбе
-          a.bodyMesh.position.y = 1.8 + Math.abs(Math.sin(time * 6 + a.bounceOffset)) * 0.4;
-          a.bodyMesh.rotation.z = Math.sin(time * 6 + a.bounceOffset) * 0.1;
+          const targetAngle = Math.atan2(dir.x, dir.z);
+          a.root.rotation.y = THREE.MathUtils.lerp(a.root.rotation.y, targetAngle, 0.06);
+
+          a.bodyMesh.position.y = 1.6 + Math.abs(Math.sin(time * 7 + a.bounceOffset)) * 0.35;
+          a.bodyMesh.rotation.z = Math.sin(time * 7 + a.bounceOffset) * 0.1;
         } else {
-          // Дыхание в покое
-          a.bodyMesh.position.y = 1.8 + Math.sin(time * 2 + a.bounceOffset) * 0.08;
+          a.bodyMesh.position.y = 1.6 + Math.sin(time * 2 + a.bounceOffset) * 0.08;
           a.bodyMesh.rotation.z = 0;
         }
       });
     }
 
     /* ====================================================================
-       5. ИНТЕРАКТИВ И ВЫБОР ЗВЕРЕЙ (RAYCASTING)
+       5. КЛИКИ И ВЗАИМОДЕЙСТВИЕ
        ==================================================================== */
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
     const infoCard = document.getElementById('info-card');
     const cardName = document.getElementById('card-name');
 
-    window.addEventListener('click', (e) => {
-      // Игнорируем клики по интерфейсу
-      if (e.target.tagName === 'BUTTON' || e.target.closest('#creator-modal')) return;
+    window.addEventListener('pointerup', (e) => {
+      // Игнорируем клики по модалке и меню
+      if (e.target.closest('#creator-modal') || e.target.closest('.hud')) return;
 
       mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
       mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
 
       raycaster.setFromCamera(mouse, camera);
-      const intersects = raycaster.intersectObjects(scene.children, true);
+      const hits = raycaster.intersectObjects(scene.children, true);
 
       let found = false;
-      for (let hit of intersects) {
+      for (let hit of hits) {
         if (hit.object.userData && hit.object.userData.name) {
           const pet = hit.object.userData;
           cardName.textContent = `${pet.name} (${BIOMES[pet.biome].name})`;
           infoCard.style.display = 'block';
-
-          // Радостный прыжок при клике
-          hit.object.position.y += 1.5;
-
+          hit.object.position.y += 1.2; // Прыжок от радости
           found = true;
           break;
         }
       }
-      if (!found && e.clientY > 100) {
+      if (!found && e.clientY > 80) {
         infoCard.style.display = 'none';
       }
     });
 
     /* ====================================================================
-       6. СОХРАНЕНИЕ В ПАМЯТИ (LOCALSTORAGE)
+       6. СОХРАНЕНИЕ В ПАМЯТИ
        ==================================================================== */
-    function saveAnimalsToStorage() {
-      const savedData = animals.map(a => ({
+    function saveAnimals() {
+      const data = animals.map(a => ({
         name: a.name,
         biome: a.biome,
-        imgData: a.bodyMesh.material[4].map.image.src
+        img: a.bodyMesh.material[4].map.image.src
       }));
-      localStorage.setItem('magic_zoo_animals', JSON.stringify(savedData));
+      localStorage.setItem('magic_zoo_save', JSON.stringify(data));
     }
 
-    function loadAnimalsFromStorage() {
-      const data = localStorage.getItem('magic_zoo_animals');
-      if (data) {
+    function loadAnimals() {
+      const raw = localStorage.getItem('magic_zoo_save');
+      if (raw) {
         try {
-          const list = JSON.parse(data);
-          list.forEach(item => generate3DFromCanvas(item.imgData, item.biome, item.name));
-        } catch (e) {
-          console.error(e);
-        }
+          const list = JSON.parse(raw);
+          list.forEach(i => spawn3DAnimal(i.img, i.biome, i.name));
+        } catch(e) { console.error(e); }
       }
     }
 
-    // Создание зверя из модального окна
-    document.getElementById('spawn-btn').onclick = () => {
-      // Проверяем, нарисовано ли что-то (не пустой ли холст)
+    // Кнопка «Оживить»
+    document.getElementById('spawn-btn').addEventListener('click', (e) => {
+      e.stopPropagation();
       const pData = ctx.getImageData(0, 0, pCanvas.width, pCanvas.height).data;
-      const isDrawn = pData.some((channel, i) => i % 4 === 3 && channel > 0);
+      const isDrawn = pData.some((channel, i) => i % 4 === 3 && channel > 10);
 
       if (!isDrawn) {
-        alert("Нарисуй кого-нибудь перед тем, как оживлять!");
+        alert("Пожалуйста, нарисуй зверька на холсте!");
         return;
       }
 
       const name = document.getElementById('animal-name').value.trim() || "Чудо-зверь";
       const biome = document.getElementById('biome-select').value;
-      const dataUrl = pCanvas.toDataURL();
+      const url = pCanvas.toDataURL();
 
-      generate3DFromCanvas(dataUrl, biome, name);
+      spawn3DAnimal(url, biome, name);
 
-      // Скрываем окно и сохраняем
       document.getElementById('creator-modal').style.display = 'none';
       ctx.clearRect(0, 0, pCanvas.width, pCanvas.height);
 
-      setTimeout(saveAnimalsToStorage, 500);
-    };
+      setTimeout(saveAnimals, 400);
+    });
 
-    document.getElementById('open-paint-btn').onclick = () => {
+    document.getElementById('open-paint-btn').addEventListener('click', (e) => {
+      e.stopPropagation();
       document.getElementById('creator-modal').style.display = 'flex';
-    };
+    });
 
-    document.getElementById('clear-all-btn').onclick = () => {
-      if (confirm("Вы уверены, что хотите очистить весь зоопарк?")) {
-        localStorage.removeItem('magic_zoo_animals');
+    document.getElementById('clear-all-btn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (confirm("Очистить зоопарк? Все созданные звери исчезнут.")) {
+        localStorage.removeItem('magic_zoo_save');
         animals.forEach(a => scene.remove(a.root));
         animals.length = 0;
         infoCard.style.display = 'none';
       }
-    };
+    });
 
-    // Адаптивность к размеру экрана
     window.addEventListener('resize', () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
     });
 
-    // Главный цикл рендера
     function animate() {
       requestAnimationFrame(animate);
       updateAnimals();
       controls.update();
       renderer.render(scene, camera);
     }
-    <!-- Подключение PWA манифеста -->
-<link rel="manifest" href="manifest.json">
 
-<!-- Поддержка полноэкранного режима на iPhone и iPad -->
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Зоопарк">
-<link rel="apple-touch-icon" href="icon-192.png">
-
-    // Старт
-    loadAnimalsFromStorage();
+    loadAnimals();
     animate();
   </script>
 </body>
